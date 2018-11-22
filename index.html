@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>记分牌算法</title>
+    <meta charset="utf8">
+    <link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+    <script src="./js/jquery-2.1.4.min.js"></script>
+    <script src="./js/Instruction_.js"></script>
+    <script src="./js/Register_.js"></script>
+    <script src="./js/FunctionUnit_.js"></script>
+    <script src="./js/Controller_.js"></script>
+    <script src="./js/main.js"></script>
+    <script src="./bootstrap/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<!--the instruction set-->
+<div class="row">
+    <div class="navbar-form ">
+        <div class="col-md-3 col-md-offset-1">
+            <h1 align="center">
+                记分牌算法
+            </h1>
+        </div>
+        <div class="col-md-3">
+            <div class="col-md-6 ">
+                <h3 align="center"> 当前周期：</h3>
+            </div>
+            <div class="col-md-6 alert-info">
+                <h1 align="center" id="count">
+                    0
+                </h1>
+            </div>
+        </div>
+
+        <div class="btn-group col-md-5" style="margin-top: 20px">
+            <button type="button" class="btn  btn-lg btn-danger" id="next"><span
+                    class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>下一周期
+            </button>
+            <button type="button" class="btn  btn-lg btn-info" id="continue"><span class="glyphicon glyphicon-play"
+                                                                                   aria-hidden="true"></span>继续
+            </button>
+            <button type="button" class="btn btn-lg " id="pause"><span class="glyphicon glyphicon-pause"
+                                                                       aria-hidden="true"></span>暂停
+            </button>
+            <button type="button" class="btn btn-lg btn-success" data-toggle="modal" data-target="#myModal"><span
+                    class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>上传指令
+            </button>
+        </div>
+
+    </div>
+
+</div>
+<hr style="margin: 20px auto">
+<div class="col-md-10 col-md-offset-1">
+    <div class="alert alert-success alert-dismissable hide" role="alert" id="regdiv">
+        <a href="#" class="close" data-dismiss="alert">
+            &times;
+        </a>
+        <strong>寄存器内容更新成功！</strong>
+    </div>
+</div>
+<div class="col-md-10 col-md-offset-1">
+    <div class="alert alert-danger alert-dismissable hide" role="alert" id="enddiv">
+
+        <strong id="end"></strong>
+    </div>
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    请在下方区域输入指令：
+                </h4>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="new_instructions" style="width: 100%; height: 200px; margin: auto">text
+                </textarea>
+
+            </div>
+            <div class="modal-footer">
+                <!--<input type="file" name="upload" id="upload" accept="text/plain"/>-->
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                </button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="load1">
+                    提交
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5 col-md-offset-1">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center"><strong>指令状态</strong></div>
+                <div class="panel-body">
+                    <table class="table table-hover">
+                        <!--<h3 align="center"> Instruction Status </h3>-->
+                        <thead>
+                        <tr>
+                            <th class="col-md-4">Instruction</th>
+                            <th class="col-md-2 bg-primary">Issue</th>
+                            <th class="col-md-2 bg-warning">Operand</th>
+                            <th class="col-md-2 bg-info">Excution</th>
+                            <th class="col-md-2 bg-danger">Write</th>
+                        </tr>
+                        </thead>
+                        <tbody id="instruction_table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="col-md-5 ">
+            <div class="panel panel-default">
+                <div class="panel-heading" align="center"><strong>功能部件</strong></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Busy</th>
+                                    <th>Op</th>
+                                    <th>Fi</th>
+                                    <th>Fj</th>
+                                    <th>Fk</th>
+                                    <th>Qj</th>
+                                    <th>Qk</th>
+                                    <th>Rj</th>
+                                    <th>Rk</th>
+                                </tr>
+                                </thead>
+                                <tbody id="function_unit">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-10 col-md-offset-1">
+            <div class="panel panel-default">
+
+                <div class="panel-heading" align="center"><strong>寄存器状态</strong>
+                    <button type="button" class="btn  btn-sm btn-info pull-right" id="regupdate"><span
+                            class="glyphicon glyphicon-play"
+                            aria-hidden="true"></span>更新内容
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="row ">
+                        <div class="col-md-12">
+
+                            <table class="table table-hover">
+                                <thead class="bg-info">
+                                <tr>
+                                    <th>名称</th>
+                                    <th>F0</th>
+                                    <th>F1</th>
+                                    <th>F2</th>
+                                    <th>F3</th>
+                                    <th>F4</th>
+                                    <th>F5</th>
+                                    <th>F6</th>
+                                    <th>F7</th>
+                                    <th>F8</th>
+                                    <th>F9</th>
+                                    <th>F10</th>
+                                    <th>F11</th>
+                                    <th>F12</th>
+                                    <th>F13</th>
+                                    <th>F14</th>
+                                    <th>F15</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="F0"></td>
+                                    <td id="F1"></td>
+                                    <td id="F2"></td>
+                                    <td id="F3"></td>
+                                    <td id="F4"></td>
+                                    <td id="F5"></td>
+                                    <td id="F6"></td>
+                                    <td id="F7"></td>
+                                    <td id="F8"></td>
+                                    <td id="F9"></td>
+                                    <td id="F10"></td>
+                                    <td id="F11"></td>
+                                    <td id="F12"></td>
+                                    <td id="F13"></td>
+                                    <td id="F14"></td>
+                                    <td id="F15"></td>
+                                </tr>
+                                <tr>
+                                    <td>内容</td>
+                                    <td><input type="text" size="1" id="F0_value"></td>
+                                    <td><input type="text" size="1" id="F1_value"></td>
+                                    <td><input type="text" size="1" id="F2_value"></td>
+                                    <td><input type="text" size="1" id="F3_value"></td>
+                                    <td><input type="text" size="1" id="F4_value"></td>
+                                    <td><input type="text" size="1" id="F5_value"></td>
+                                    <td><input type="text" size="1" id="F6_value"></td>
+                                    <td><input type="text" size="1" id="F7_value"></td>
+                                    <td><input type="text" size="1" id="F8_value"></td>
+                                    <td><input type="text" size="1" id="F9_value"></td>
+                                    <td><input type="text" size="1" id="F10_value"></td>
+                                    <td><input type="text" size="1" id="F11_value"></td>
+                                    <td><input type="text" size="1" id="F12_value"></td>
+                                    <td><input type="text" size="1" id="F13_value"></td>
+                                    <td><input type="text" size="1" id="F14_value"></td>
+                                    <td><input type="text" size="1" id="F15_value"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+
+                            <table class="table table-hover">
+                                <thead class="bg-info">
+                                <tr>
+                                    <th>名称</th>
+                                    <th>F16</th>
+                                    <th>F17</th>
+                                    <th>F18</th>
+                                    <th>F19</th>
+                                    <th>F20</th>
+                                    <th>F21</th>
+                                    <th>F22</th>
+                                    <th>F23</th>
+                                    <th>F24</th>
+                                    <th>F25</th>
+                                    <th>F26</th>
+                                    <th>F27</th>
+                                    <th>F28</th>
+                                    <th>F29</th>
+                                    <th>F30</th>
+                                    <th>F31</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="F16"></td>
+                                    <td id="F17"></td>
+                                    <td id="F18"></td>
+                                    <td id="F19"></td>
+                                    <td id="F20"></td>
+                                    <td id="F21"></td>
+                                    <td id="F22"></td>
+                                    <td id="F23"></td>
+                                    <td id="F24"></td>
+                                    <td id="F25"></td>
+                                    <td id="F26"></td>
+                                    <td id="F27"></td>
+                                    <td id="F28"></td>
+                                    <td id="F29"></td>
+                                    <td id="F30"></td>
+                                    <td id="F31"></td>
+                                </tr>
+                                <tr>
+                                    <td>内容</td>
+                                    <td><input type="text" size="1" id="F16_value"></td>
+                                    <td><input type="text" size="1" id="F17_value"></td>
+                                    <td><input type="text" size="1" id="F18_value"></td>
+                                    <td><input type="text" size="1" id="F19_value"></td>
+                                    <td><input type="text" size="1" id="F20_value"></td>
+                                    <td><input type="text" size="1" id="F21_value"></td>
+                                    <td><input type="text" size="1" id="F22_value"></td>
+                                    <td><input type="text" size="1" id="F23_value"></td>
+                                    <td><input type="text" size="1" id="F24_value"></td>
+                                    <td><input type="text" size="1" id="F25_value"></td>
+                                    <td><input type="text" size="1" id="F26_value"></td>
+                                    <td><input type="text" size="1" id="F27_value"></td>
+                                    <td><input type="text" size="1" id="F28_value"></td>
+                                    <td><input type="text" size="1" id="F29_value"></td>
+                                    <td><input type="text" size="1" id="F30_value"></td>
+                                    <td><input type="text" size="1" id="F31_value"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-hover">
+                                <thead class="bg-info">
+                                <tr>
+                                    <th>名称</th>
+                                    <th>R0</th>
+                                    <th>R1</th>
+                                    <th>R2</th>
+                                    <th>R3</th>
+                                    <th>R4</th>
+                                    <th>R5</th>
+                                    <th>R6</th>
+                                    <th>R7</th>
+                                    <th>R8</th>
+                                    <th>R9</th>
+                                    <th>R10</th>
+                                    <th>R11</th>
+                                    <th>R12</th>
+                                    <th>R13</th>
+                                    <th>R14</th>
+                                    <th>R15</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="R0"></td>
+                                    <td id="R1"></td>
+                                    <td id="R2"></td>
+                                    <td id="R3"></td>
+                                    <td id="R4"></td>
+                                    <td id="R5"></td>
+                                    <td id="R6"></td>
+                                    <td id="R7"></td>
+                                    <td id="R8"></td>
+                                    <td id="R9"></td>
+                                    <td id="R10"></td>
+                                    <td id="R11"></td>
+                                    <td id="R12"></td>
+                                    <td id="R13"></td>
+                                    <td id="R14"></td>
+                                    <td id="R15"></td>
+                                </tr>
+                                <tr>
+                                    <td>内容</td>
+                                    <td><input type="text" size="1" id="R0_value"></td>
+                                    <td><input type="text" size="1" id="R1_value"></td>
+                                    <td><input type="text" size="1" id="R2_value"></td>
+                                    <td><input type="text" size="1" id="R3_value"></td>
+                                    <td><input type="text" size="1" id="R4_value"></td>
+                                    <td><input type="text" size="1" id="R5_value"></td>
+                                    <td><input type="text" size="1" id="R6_value"></td>
+                                    <td><input type="text" size="1" id="R7_value"></td>
+                                    <td><input type="text" size="1" id="R8_value"></td>
+                                    <td><input type="text" size="1" id="R9_value"></td>
+                                    <td><input type="text" size="1" id="R10_value"></td>
+                                    <td><input type="text" size="1" id="R11_value"></td>
+                                    <td><input type="text" size="1" id="R12_value"></td>
+                                    <td><input type="text" size="1" id="R13_value"></td>
+                                    <td><input type="text" size="1" id="R14_value"></td>
+                                    <td><input type="text" size="1" id="R15_value"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <table class="table table-hover">
+                                <thead class="bg-info">
+                                <tr>
+                                    <th>名称</th>
+                                    <th>R16</th>
+                                    <th>R17</th>
+                                    <th>R18</th>
+                                    <th>R19</th>
+                                    <th>R20</th>
+                                    <th>R21</th>
+                                    <th>R22</th>
+                                    <th>R23</th>
+                                    <th>R24</th>
+                                    <th>R25</th>
+                                    <th>R26</th>
+                                    <th>R27</th>
+                                    <th>R28</th>
+                                    <th>R29</th>
+                                    <th>R30</th>
+                                    <th>R31</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="R16"></td>
+                                    <td id="R17"></td>
+                                    <td id="R18"></td>
+                                    <td id="R19"></td>
+                                    <td id="R20"></td>
+                                    <td id="R21"></td>
+                                    <td id="R22"></td>
+                                    <td id="R23"></td>
+                                    <td id="R24"></td>
+                                    <td id="R25"></td>
+                                    <td id="R26"></td>
+                                    <td id="R27"></td>
+                                    <td id="R28"></td>
+                                    <td id="R29"></td>
+                                    <td id="R30"></td>
+                                    <td id="R31"></td>
+                                </tr>
+                                <tr>
+                                    <td>内容</td>
+                                    <td><input type="text" size="1" id="R16_value"></td>
+                                    <td><input type="text" size="1" id="R17_value"></td>
+                                    <td><input type="text" size="1" id="R18_value"></td>
+                                    <td><input type="text" size="1" id="R19_value"></td>
+                                    <td><input type="text" size="1" id="R20_value"></td>
+                                    <td><input type="text" size="1" id="R21_value"></td>
+                                    <td><input type="text" size="1" id="R22_value"></td>
+                                    <td><input type="text" size="1" id="R23_value"></td>
+                                    <td><input type="text" size="1" id="R24_value"></td>
+                                    <td><input type="text" size="1" id="R25_value"></td>
+                                    <td><input type="text" size="1" id="R26_value"></td>
+                                    <td><input type="text" size="1" id="R27_value"></td>
+                                    <td><input type="text" size="1" id="R28_value"></td>
+                                    <td><input type="text" size="1" id="R29_value"></td>
+                                    <td><input type="text" size="1" id="R30_value"></td>
+                                    <td><input type="text" size="1" id="R31_value"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <hr style="margin:30px auto">
+
+</div>
+</body>
+</html>
