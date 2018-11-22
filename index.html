@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>记分牌</title>
+    <title>记分牌算法</title>
     <meta charset="utf8">
     <link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap-slider.css">
     <script src="./js/jquery-2.1.4.min.js"></script>
     <script src="./js/Instruction_.js"></script>
     <script src="./js/Register_.js"></script>
@@ -11,29 +12,33 @@
     <script src="./js/Controller_.js"></script>
     <script src="./js/main.js"></script>
     <script src="./bootstrap/js/bootstrap.min.js"></script>
+    <script src="./bootstrap/js/bootstrap-slider.js"></script>
 </head>
 
 <body>
 <!--the instruction set-->
 <div class="row">
     <div class="navbar-form ">
+
+
         <div class="col-md-3 col-md-offset-1">
-            <h1 align="center">
-                记分牌算法
-            </h1>
-        </div>
-        <div class="col-md-3">
-            <div class="col-md-6 ">
+            <div class="col-md-8 ">
                 <h3 align="center"> 当前周期：</h3>
             </div>
-            <div class="col-md-6 alert-info">
+            <div class="col-md-4 alert-info">
                 <h1 align="center" id="count">
                     0
                 </h1>
             </div>
         </div>
+        <div class="col-md-3 ">
+            <div class="col-md-4 "><h3 align="center"> 速度：</h3></div>
+            <div class="col-md-7 " style="margin-top: 25px;">
+                <input id="ex1" data-slider-id='ex1Slider' type="text" data-slider-min="0" data-slider-max="19" data-slider-step="1" data-slider-value="10" style="background:  #BABABA;"/>
+            </div>
+        </div>
+        <div class="btn-group col-md-5" >
 
-        <div class="btn-group col-md-5" style="margin-top: 20px">
             <button type="button" class="btn  btn-lg btn-danger" id="next"><span
                     class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>下一周期
             </button>
@@ -193,7 +198,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr> 
+                                <tr>
                                     <td>状态</td>
                                     <td id="F0"></td>
                                     <td id="F1"></td>

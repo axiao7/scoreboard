@@ -1,13 +1,23 @@
 $(document).ready(function () {
     let flag=false;
     let regflag=false;
+    let speed=1000;
     // let uiFetchedInstructions = [];
     let source = "LD F6 34 R2\r\nLD F2 45 R3\r\nMULT F0 F2 F4\r\n";
     source += "SUBD F8 F6 F2\r\nDIVD F10 F0 F6\r\nADDD F6 F8 F2";
     let model=$("#new_instructions").val(source);
-    let controller= new Controller();
+    let controller= new Controller([]);
     let timeID = 0;
     uiRunSimulate();
+    //更新速度
+    $('#ex1').slider({
+        formatter: function(value) {
+            speed=(20-value)*100;
+            return '当前速度: ' + speed/1000+'秒';
+        }
+    });
+
+
 
     $("#regupdate").click(function () {//更新寄存器信息
         for (let key in controller.registers) {
@@ -103,9 +113,9 @@ $(document).ready(function () {
     // 更新所有界面
     function uiRunSimulate() {
         if (controller.forward() ) {
-            timeID = window.setTimeout(uiRunSimulate, 200);
-        }else if(flag)
-        {flag=false;
+            timeID = window.setTimeout(uiRunSimulate, speed);
+        }else if(flag) {
+            flag=false;
             $("input").attr("disabled",false);
             $("#regupdate").attr("disabled",false);
             let end =$("#end");

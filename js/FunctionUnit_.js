@@ -39,7 +39,7 @@ class FunctionUnit {
             return false;
         }
 
-        if (registers[instruction.dest].state) { //目标寄存器被占用，即发生 WRW 冲突.
+        if (registers[instruction.dest].state) { //目标寄存器被占用，即发生 WAW 冲突.
             return false;
         }
 
@@ -56,7 +56,7 @@ class FunctionUnit {
         if (!!registers[instruction.source_1]) {
             this.Fj = instruction.source_1;
             registers[this.Fj].read = clock;
-            if (registers[this.Fj].state == false) {//寄存器可用
+            if (registers[this.Fj].state == false) {//如果寄存器可用
                 this.Rj = "Yes";
                 this.Qj = "";
             } else {

@@ -65,7 +65,7 @@ class Controller {
     //若未超过最大并行指令数，则把输入指令系列的一条放入就绪指令序列
     fetchIntruction () {
         let temp = this.instructions.shift();
-        let count = this.fetched.filter( (element) => {
+        let count = this.fetched.filter(function (element) {
             return !element.isFinished();
         }).length;
         if (temp && count < this.maxFetchSize) {
@@ -91,15 +91,16 @@ class Controller {
         // var that = this;
         for (let key in this.functionUnitSet) {//所有功能部件执行下一周期
             this.functionUnitSet[key].forwardPipeline(this.registers, this.clock);
-        }
-        // 更新功能部件信息
-        for (let key in this.functionUnitSet) {
             this.functionUnitSet[key].updateInfo(this.registers);
         }
-        // 尝试执行指令
+        // 更新功能部件信息
+        // for (let key in this.functionUnitSet) {
+        //     this.functionUnitSet[key].updateInfo(this.registers);
+        // }
+        // 尝试加载指令
         for (let i = 0; i < this.fetched.length; i++) {
             let element = this.fetched[i];
-            // 尝试执行一条未执行的指令
+            // 尝试加载一条指令
             if (!element.isRunning()) {
                 let unitnames = this.opToFunctionUnit[element.Op];
                 for (let i = 0; i < unitnames.length; i++) {
