@@ -65,7 +65,7 @@ class Controller {
     //若未超过最大并行指令数，则把输入指令系列的一条放入就绪指令序列
     fetchIntruction () {
         let temp = this.instructions.shift();
-        let count = this.fetched.filter(function (element) {
+        let count = this.fetched.filter( (element) => {
             return !element.isFinished();
         }).length;
         if (temp && count < this.maxFetchSize) {
