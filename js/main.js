@@ -1,6 +1,7 @@
 $(document).ready(function () {
     let flag=false;
     let regflag=false;
+    let lastflag=false;
     let speed=1000;
     // let uiFetchedInstructions = [];
     let source = "LD F6 34 R2\r\nLD F2 45 R3\r\nMULT F0 F2 F4\r\n";
@@ -8,6 +9,8 @@ $(document).ready(function () {
     let model=$("#new_instructions").val(source);
     let controller= new Controller([]);
     let timeID = 0;
+
+    let oldins;
     uiRunSimulate();
     //更新速度
     $('#ex1').slider({
@@ -37,6 +40,10 @@ $(document).ready(function () {
     });
     $("#next").click(function () {//下一周期
         window.clearTimeout(timeID);
+        if(lastflag){
+            lastflag=false;
+            controller.bk[controller.bk.length]=oldins;
+        }
         if(!controller.forward()&&flag)
         {flag=false;
             $("input").attr("disabled",false);
@@ -53,14 +60,130 @@ $(document).ready(function () {
         uiUpdateRegister(controller);
 
     });
-    $("#load1").click(function () {
+    $("#last").click(function () {//上一周期
+        lastflag=true;
+        window.clearTimeout(timeID);
+        if(controller.bk.length==0){
+            alert("不能再退了，请向前运行。")
+            return;
+        }
+        let tep=controller.bk.pop();
+        oldins=JSON.parse(JSON.stringify(tep));
+        console.log(controller.bk.length);
+
+        controller.clock=tep.clock;
+
+        for(let i in controller.registers){//回退更新寄存器信息
+            controller.registers[i].regSetdata(tep.registers[i]);
+        }
+        controller.instructions=[];
+        for(let i=0;i< tep.instructions.length;i++){//回退更新指令数组
+            let instep=new Instruction(tep.instructions[i].Op, tep.instructions[i].dest, tep.instructions[i].source_1, tep.instructions[i].source_2);
+            instep.insSetdata(tep.instructions[i]);
+            controller.instructions.push(instep);
+        }
+        controller.fetched=[];
+        for(let i=0;i< tep.fetched.length;i++){//回退更新就绪执行指令数组
+
+                    let instep=new Instruction(tep.fetched[i].Op, tep.fetched[i].dest, tep.fetched[i].source_1, tep.fetched[i].source_2);
+                    instep.insSetdata(tep.fetched[i]);
+                    controller.fetched.push(instep);
+
+            }
+                // console.log(controller.fetched);
+
+        //以下更新功能部件信息，以及修改当前指令，指向就绪数组中的指令
+        if(tep.functionUnitSet.Add.busy=="Yes"){
+            controller.functionUnitSet.Add.funSetdata(tep.functionUnitSet.Add);
+            // let tepins;
+            for(let i=0;i< controller.fetched.length;i++){
+                if(controller.fetched[i].Op==tep.functionUnitSet.Add.currentInstruction.Op&& controller.fetched[i].dest==tep.functionUnitSet.Add.currentInstruction.dest&&controller.fetched[i].source_1== tep.functionUnitSet.Add.currentInstruction.source_1&&controller.fetched[i].source_2== tep.functionUnitSet.Add.currentInstruction.source_2){
+                    controller.functionUnitSet.Add.currentInstruction=controller.fetched[i];
+                    break;
+                }
+
+            }
+
+        }else{
+            controller.functionUnitSet.Add.clear();
+        };
+
+        if(tep.functionUnitSet.Divide.busy=="Yes"){
+            controller.functionUnitSet.Divide.funSetdata(tep.functionUnitSet.Divide);
+            for(let i=0;i< controller.fetched.length;i++){
+                if(controller.fetched[i].Op==tep.functionUnitSet.Divide.currentInstruction.Op&& controller.fetched[i].dest==tep.functionUnitSet.Divide.currentInstruction.dest&&controller.fetched[i].source_1== tep.functionUnitSet.Divide.currentInstruction.source_1&&controller.fetched[i].source_2== tep.functionUnitSet.Divide.currentInstruction.source_2){
+                    controller.functionUnitSet.Divide.currentInstruction=controller.fetched[i];
+                    break;
+                }
+
+            }
+
+
+        }else{
+            controller.functionUnitSet.Divide.clear();
+        };
+        if(tep.functionUnitSet.Integer.busy=="Yes"){
+            controller.functionUnitSet.Integer.funSetdata(tep.functionUnitSet.Integer);
+            for(let i=0;i< controller.fetched.length;i++){
+                // console.log(i+""+controller.fetched[i].Op+"   op   "+tep.functionUnitSet.Integer.Op+"    "+controller.fetched[i].dest+"   dest   "+tep.functionUnitSet.Integer.dest+"   "+controller.fetched[i].source_1+"  s1 "+tep.functionUnitSet.Integer.source_1+"  "+controller.fetched[i].source_2+"   s2"+tep.functionUnitSet.Integer.source_2+"")
+                if(controller.fetched[i].Op==tep.functionUnitSet.Integer.currentInstruction.Op&& controller.fetched[i].dest==tep.functionUnitSet.Integer.currentInstruction.dest&&controller.fetched[i].source_1== tep.functionUnitSet.Integer.currentInstruction.source_1&&controller.fetched[i].source_2== tep.functionUnitSet.Integer.currentInstruction.source_2){
+                    controller.functionUnitSet.Integer.currentInstruction=controller.fetched[i];
+                    break;
+                }
+
+            }
+
+        }else{
+            controller.functionUnitSet.Integer.clear();
+        };
+        if(tep.functionUnitSet.Mult1.busy=="Yes"){
+            controller.functionUnitSet.Mult1.funSetdata(tep.functionUnitSet.Mult1);
+            for(let i=0;i< controller.fetched.length;i++){
+                if(controller.fetched[i].Op==tep.functionUnitSet.Mult1.currentInstruction.Op&& controller.fetched[i].dest==tep.functionUnitSet.Mult1.currentInstruction.dest&&controller.fetched[i].source_1== tep.functionUnitSet.Mult1.currentInstruction.source_1&&controller.fetched[i].source_2== tep.functionUnitSet.Mult1.currentInstruction.source_2){
+                    controller.functionUnitSet.Mult1.currentInstruction=controller.fetched[i];
+                    break;
+                }
+
+            }
+
+        }else{
+            controller.functionUnitSet.Mult1.clear();
+        };
+        if(tep.functionUnitSet.Mult2.busy=="Yes"){
+            controller.functionUnitSet.Mult2.funSetdata(tep.functionUnitSet.Mult2);
+            for(let i=0;i< controller.fetched.length;i++){
+                if(controller.fetched[i].Op==tep.functionUnitSet.Mult2.currentInstruction.Op&& controller.fetched[i].dest==tep.functionUnitSet.Mult2.currentInstruction.dest&&controller.fetched[i].source_1== tep.functionUnitSet.Mult2.currentInstruction.source_1&&controller.fetched[i].source_2== tep.functionUnitSet.Mult2.currentInstruction.source_2){
+                    controller.functionUnitSet.Mult2.currentInstruction=controller.fetched[i];
+                    break;
+                }
+            }
+
+        }else{
+            controller.functionUnitSet.Mult2.clear();
+        };
+
+
+        console.log(tep);
+        // count.html(controller.clock);
+        let count = $("#count");
+        count.html(controller.clock);
+        uiUpdateRegister(controller);
+        uiUpdateInstructions(controller);
+        uiUpdtateFunctionUnit(controller);
+
+
+    });
+
+    $("#load1").click(function () {//点击上传指令
         flag=true;
         $("#regdiv").attr("class","alert alert-success alert-dismissable hide");
         $("input").attr("disabled",true);
         $("#regupdate").attr("disabled",true);
 
         $("#enddiv").removeClass('in').addClass('hide');
-        if(regflag){
+        if(!regflag){
+            controller.init();
+        }else{
             controller.init2();
         }
 
@@ -84,7 +207,7 @@ $(document).ready(function () {
                     throw BreakException;
                 }
             });
-            $("#new_instructions").val("");
+            // $("#new_instructions").val("");
             let update_all_instructions = controller.getNotExecInctruction();
             $("#instruction_table").html("");
             for(let i =0;i<update_all_instructions.length;i++){
@@ -201,11 +324,13 @@ $(document).ready(function () {
         let rows = $("#instruction_table").find("tr");
         for (let i = 0; i < simulator.fetched.length; i ++) {
             let instruction = simulator.fetched[i];
+                if(instruction){
+                    let cols = $(rows[i]).find("td");
+                    $(cols[0]).html(instruction.getSource());
+                    for (let j = 0; j < instruction.stage.length; j ++) {
+                        $(cols[j + 1]).html(instruction.stage[j]);
+                }
 
-                let cols = $(rows[i]).find("td");
-                $(cols[0]).html(instruction.getSource());
-                for (let j = 0; j < instruction.stage.length; j ++) {
-                    $(cols[j + 1]).html(instruction.stage[j]);
 
             }
         }

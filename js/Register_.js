@@ -11,5 +11,11 @@ class Register {
         this.state = false;
         this.manipulation = "";
     }
+    regSetdata (tep){
+        this.state = tep.state;
+        this.manipulation = tep.manipulation;//占用该寄存器的功能部件名称
+        this.read = tep.read; // 作为指令的源寄存器，指令的加载时间。0表示已读取操作数，解除占用
+        this.value = tep.value;//寄存器的内容
+    }
 
 }

@@ -2,7 +2,8 @@ class FunctionUnit {
 
     constructor (name, execTime) {
         this.name = name; //运算部件名称
-        this.busy = false;//记录运算部件是否占用，true为占用
+        // this.busy = false;//记录运算部件是否占用，true为占用
+        this.busy = "No";//记录运算部件是否占用，true为占用
         this.Op = "";//指令名称
         this.Fi = "";//目标寄存器编号
         this.Fj = "";//源寄存器1编号
@@ -19,7 +20,7 @@ class FunctionUnit {
 
     //初始化功能部件
     clear () {
-        this.busy = false;
+        this.busy = "No";
         this.Op = "";
         this.Fi = "";
         this.Fj = "";
@@ -46,12 +47,13 @@ class FunctionUnit {
         // 成功加载当前指令，记录当前指令的指令流出时间，更新功能部件和目标寄存器占用状态
         instruction.setIssue(clock);
         this.currentInstruction = instruction;
-        this.busy = true;
+        this.busy = "Yes";
         this.exec = 1;
         this.Op = instruction.Op;
         this.Fi = instruction.dest;
         registers[instruction.dest].manipulation = this.name;
         registers[instruction.dest].state = true;
+
         // 根据当前指令源寄存器状态，更新功能部件的Rj，Rk，Qj，Qk的值
         if (!!registers[instruction.source_1]) {
             this.Fj = instruction.source_1;
@@ -100,9 +102,10 @@ class FunctionUnit {
                     registers[this.Fk].read = 0;
                 }
             } else if (this.exec == 2) {//当前阶段是读操作数，进行下一阶段执行
-                this.currentInstruction.setExec(clock);
+
                 // 时间达到指令执行所需时间后（加法2，乘法10，除法40），开始执行指令，
                 if (clock - this.execStart >= this.execTime) {
+                    this.currentInstruction.setExec(clock);
                     this.exec++;
                     switch (this.currentInstruction.Op) {
                         case "LD":
@@ -124,12 +127,14 @@ class FunctionUnit {
                     }
                 }
             } else if (this.exec == 3) {//当前阶段是执行，进行下一阶段写回
-                this.currentInstruction.setWrite(clock);
-                registers[this.currentInstruction.dest].value = parseFloat(this.currentInstruction.temp).toFixed(1);
+
+
                 //在写回之前，没有其他指令要读，则写回
                 if (registers[this.Fi].read == 0 ||
                     this.currentInstruction.issueTime() < registers[this.Fi].read) {
                     this.exec++;
+                    this.currentInstruction.setWrite(clock);
+                    registers[this.currentInstruction.dest].value = parseFloat(this.currentInstruction.temp).toFixed(1);
                     registers[this.Fi].clear();
                 }
             } else {
@@ -156,5 +161,23 @@ class FunctionUnit {
             this.Rk = "Yes";
         }
     }
+    funSetdata(tep){
+        this.name = tep.name; //运算部件名称
+        // this.busy = false;//记录运算部件是否占用，true为占用
+        this.busy = tep.busy;//记录运算部件是否占用，true为占用
+        this.Op = tep.Op;//指令名称
+        this.Fi = tep.Fi;//目标寄存器编号
+        this.Fj = tep.Fj;//源寄存器1编号
+        this.Fk = tep.Fk;//源寄存器2编号
+        this.Qj = tep.Qj;//产生源寄存器Fj的功能部件
+        this.Qk = tep.Qk;//产生源寄存器Fk的功能部件
+        this.Rj = tep.Rj;//表示Fj是否就绪，就绪为Yes
+        this.Rk = tep.Rk;//表示Fk是否就绪，就绪为Yes
+        this.exec = tep.exec;//指令运行阶段，0：当前功能部件未占用 1：指令流出 2：读操作数 3：执行 4：写回 5：当前指令执行结束
+        this.execTime = tep.execTime;   // 指令执行需要的周期，加法、乘法、除法功能部件分别为2,10,40，在实例化时传入
+        this.execStart = tep.execStart; // 当前指令开始执行的时间
+        // this.currentInstruction = null; // 当前指令
+    }
+
 
 }

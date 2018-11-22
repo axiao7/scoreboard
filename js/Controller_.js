@@ -35,7 +35,8 @@ class Controller {
     }
 
     init2 () {
-        this.clock = -1;     // 初始时钟周期
+        this.bk= [];
+        this.clock = 0;     // 初始时钟周期
         this.maxFetchSize = 10;     //可同时运行的最大指令数
         this.instructions = [];   // 输入的指令数组
         this.fetched = [];  // 就绪或正在执行的指令数组
@@ -66,7 +67,7 @@ class Controller {
     fetchIntruction () {
         let temp = this.instructions.shift();
         let count = this.fetched.filter(function (element) {
-            return !element.isFinished();
+            return element&&!element.isFinished();
         }).length;
         if (temp && count < this.maxFetchSize) {
             this.fetched.push(temp);
@@ -101,7 +102,7 @@ class Controller {
         for (let i = 0; i < this.fetched.length; i++) {
             let element = this.fetched[i];
             // 尝试加载一条指令
-            if (!element.isRunning()) {
+            if (element&&!element.isRunning()) {
                 let unitnames = this.opToFunctionUnit[element.Op];
                 for (let i = 0; i < unitnames.length; i++) {
                     let unit = this.functionUnitSet[unitnames[i]];
@@ -113,11 +114,23 @@ class Controller {
                 break;
             }
         }
+        this.backups();
         // 判断所有指令是否执行完毕
         let count = this.fetched.filter( (element) => {
-            return !element.isFinished();
+            return element&&!element.isFinished();
         }).length;
         return count == 0 ? false : true;
+    }
+    backups(){
+        let tep={};
+        tep["clock"]=this.clock;
+        tep["instructions"]=JSON.parse(JSON.stringify(this.instructions));
+        tep["fetched"]=JSON.parse(JSON.stringify(this.fetched));
+        tep["functionUnitSet"]=JSON.parse(JSON.stringify(this.functionUnitSet));
+        tep["registers"]=JSON.parse(JSON.stringify(this.registers));
+        this.bk.push(tep);
+        console.log(this.bk);
+        // console.log("==="+this.bk.pop());
     }
 
 

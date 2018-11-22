@@ -51,6 +51,16 @@ class Instruction {
     isFinished () {
         return this.state == 2 ? true : false;
     }
+    insSetdata(tep){
+        this.Op = tep.Op;//指令名称
+        this.dest = tep.dest;//目标寄存器
+        this.source_1 = tep.source_1;//源寄存器1
+        this.source_2 = tep.source_2;//源寄存器2
+        this.state = tep.state; // 指令状态 0： 没有执行，1： 正在执行，2： 执行结束
+        this.stage = tep.stage;//记录指令执行每个阶段的时钟周期，四个阶段分别是：指令流出、读操作数、执行、写回
+        this.temp = tep.temp;//计算指令结果的中间存储变量
+        // console.log( this.Op+""+this.stage);
+    }
 
 
 
